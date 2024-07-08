@@ -32,6 +32,8 @@ app.get("/dispositivos", (req, res) => {
     });
 });
 
+
+//obtiene producto por id
 app.get("/dispositivos/:id", (req, res) => {
   const { id } = req.params;
   product
@@ -49,12 +51,13 @@ app.get("/dispositivos/:id", (req, res) => {
     });
 });
 
+
+//obtiene producto por codigo
 app.get("/dispositivos/codigo/:codigo", (req, res) => {
   const { codigo } = req.params;
 
   if (Number(codigo)) {
     const parse = parseInt(codigo);
-    console.log(codigo);
     const query = !codigo ? {} : { codigo: { $eq: parse } };
 
     product
@@ -76,6 +79,63 @@ app.get("/dispositivos/codigo/:codigo", (req, res) => {
     res.status(400).send("Error, tipo de parametro invalido");
   }
 });
+
+
+//agregar producto
+app.post('/peliculas', (req, res) => {
+  const nuevaPeli = new Movie(req.body)
+  nuevaPeli
+    .save()
+    .then((peliculaGuardada) => {
+      res.status(201).json(peliculaGuardada)
+    })
+    .catch((error) => {
+      console.error('Error al agregar la pelicula: ', error)
+      res.status(500).send('Error al agregar la pelicula')
+    })
+})
+
+
+
+app.delete("/dispositivos/delete/:codigo", (req, res) => {
+  const { codigo } = req.params;
+
+  if (Number(codigo)) {
+    const parse = parseInt(codigo);
+    const query = { codigo: { $eq: parse } };
+
+    product.deleteOne ( query ).then((dispositivos) => {
+        if (dispositivos.deletedCount > 0 ) {
+          res.status(200).send ("Producto eliminado")
+        } else {
+          res.status(404).send("Error, objeto no identificado");
+        }
+      })
+      .catch(() => {
+        res.status(500).send("Error al obtener los dispositivos: ");
+      });
+  } else {
+    res.status(400).send("Error, tipo de parametro invalido");
+  }
+});
+
+
+
+
+
+
+
+
+
+
+
+app.listen(port, () => {
+  console.log(`Example app listening on http://localhost:${port}`);
+});
+
+
+
+
 
 /* app.get("/dispositivos/codigo/:codigo", (req, res) => {
   try {
@@ -108,6 +168,3 @@ app.get("/dispositivos/codigo/:codigo", (req, res) => {
 });
  */
 //Inicializamos el servidor
-app.listen(port, () => {
-  console.log(`Example app listening on http://localhost:${port}`);
-});
