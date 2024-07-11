@@ -81,13 +81,31 @@ app.get("/dispositivos/codigo/:codigo", (req, res) => {
 });
 
 
+
+
+app.get("/dispositivos/nombre/:nombre", (req, res) => {
+  const { nombre } = req.params;
+  const query = { nombre: { $regex: "^" + nombre , "$options": "i" } };
+  product
+    .find(query)
+    .then((respuesta) => {
+      res.status(200).json(respuesta);
+    })
+    .catch((error) => {
+      res.status(500).send("Error al obtener los dispositivos: ");
+    });
+});
+
+
+
 //agregar producto
-app.post('/peliculas', (req, res) => {
-  const nuevaPeli = new Movie(req.body)
-  nuevaPeli
+app.post("/dispositivos/agregar/", (req, res) => {
+
+  const dispositivos = new product (req.body)
+  dispositivos
     .save()
-    .then((peliculaGuardada) => {
-      res.status(201).json(peliculaGuardada)
+    .then((dispositivoguardado) => {
+      res.status(201).json(dispositivoguardado)
     })
     .catch((error) => {
       console.error('Error al agregar la pelicula: ', error)
@@ -96,6 +114,30 @@ app.post('/peliculas', (req, res) => {
 })
 
 
+
+app.patch("/dispositivos/modificar/:codigo", (req, res) => {
+  const  {codigo}  = req.params;
+  const  modificacion  = req.body.precio;
+
+  if (Number(codigo)) {
+    const parse = parseInt(codigo);
+    const query = {codigo: { $eq: parse } };  
+  product
+    .findOneAndUpdate(query,{$set:{precio:modificacion}}, { new: true })
+
+    .then((dispositivoActualizado) => {
+      if (!dispositivoActualizado) {
+        return res.status(404).send('Dispositivo no encontrado');
+      }
+      res.status(200).json(dispositivoActualizado); 
+    })
+    .catch((error) => {
+      res.status(500).send("Error al obtener los dispositivos: ");
+    })}
+  else {
+    res.status(400).send("Error, tipo de parametro invalido");
+  }
+});
 
 app.delete("/dispositivos/delete/:codigo", (req, res) => {
   const { codigo } = req.params;
@@ -120,13 +162,9 @@ app.delete("/dispositivos/delete/:codigo", (req, res) => {
 });
 
 
-
-
-
-
-
-
-
+app.use ( (req, res) => {
+  res.status(404).send("Página no encontrada");
+});
 
 
 app.listen(port, () => {
