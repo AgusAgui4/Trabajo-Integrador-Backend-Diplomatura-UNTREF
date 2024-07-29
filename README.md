@@ -1,109 +1,180 @@
-# Proyecto Integrador: CRUD con Node.js y MongoDB
+1. **Configuración Inicial**
+<!-- 
+const express = require("express");
+const app = express();
+const connectDB = require("./src/database");
+const port = process.env.PORT ?? 3000;
+const morgan = require("morgan");
+const product = require("./src/product");
+const jwt = require('jsonwebtoken');
+const secretKey = process.env.SECRET_KEY;
+const usuario = require('./src/users'); 
+-->
 
-## Descripción del Proyecto
+express: Framework de Node.js para crear aplicaciones web.
 
-En este proyecto, desarrollarás una aplicación basada en Node.js y MongoDB que permita realizar operaciones CRUD (Crear, Leer, Actualizar, Eliminar) en una base de datos. La base de datos MongoDB deberá estar generada en el clúster de mongodb.com y tu aplicación Node.js se conectará a ella.
+app: Instancia de la aplicación Express.
 
-Podrás usar alguno de los datasets JSON proporcionados, o crear uno propio que contenga entre 20 y 30 productos, distribuidos en varias categorías.
+connectDB: Función para conectar con la base de datos MongoDB (definida en ./src/database).
 
-## Datasets Proporcionados
+port: Puerto en el que se ejecuta la aplicación, configurable a través de una variable de entorno o por defecto a 3000.
 
-- **computacion.json**: Productos de computación, partes, accesorios y repuestos.
-- **electronicos.json**: Productos electrónicos de consumo.
-- **granjas.json**: Frutas y verduras.
-- **mobiliario.json**: Muebles de hogar y oficina.
-- **prendas.json**: Prendas de vestir.
-- **supermercado.json**: Productos de supermercado.
+morgan: Middleware para registrar las solicitudes HTTP en la consola.
 
-## Funcionalidades del CRUD
+product: Modelo Mongoose para productos (dispositivos).
 
-1. **Obtener todos los productos**
-   - Endpoint para leer todos los productos de la colección.
-   - Control de errores para manejar la indisponibilidad de la base de datos.
+jwt: Librería para generar y verificar tokens JWT.
 
-2. **Obtener un producto**
-   - Endpoint para obtener un producto por su ID.
-   - Control de errores para manejar casos en que el producto no se encuentre o la base de datos no esté disponible.
+secretKey: Clave secreta para firmar tokens JWT, definida en las variables de entorno.
 
-3. **Filtrar productos**
-   - Endpoint para filtrar productos por nombre (búsqueda parcial).
-   - Control de errores para manejar coincidencias no encontradas o problemas de conexión.
+usuario: Modelo Mongoose para usuarios.
 
-4. **Agregar un nuevo producto**
-   - Endpoint para agregar un nuevo producto.
-   - Validación y control de errores.
-   - Generación de un código numérico para el nuevo producto.
+2. **Conexión a la Base de Datos**
+<!-- 
+connectDB(); 
+-->
 
-5. **Modificar el precio de un producto**
-   - Endpoint para cambiar el precio de un producto usando PATCH.
-   - Control de errores para manejar problemas durante la actualización.
-     
-6. **Borrar un producto**
-   - Endpoint para borrar un producto usando DELETE.
-   - Control de errores para manejar problemas durante el borrado.
+Esta línea establece una conexión con la base de datos MongoDB utilizando la función connectDB definida en ./src/database.
 
-7. **Control de errores**
-   - Manejo de errores en la estructura de las solicitudes y respuestas.
-   - Respuesta adecuada con mensajes y códigos de error específicos.
-   - Control de acceso a rutas no existentes con respuestas apropiadas.
+3. **Middleware**
+<!-- 
+app.use(express.json());
+app.use(morgan("dev"));
+ -->
 
-## Fechas Importantes
+express.json(): Middleware que analiza los cuerpos de las solicitudes JSON.
+morgan("dev"): Middleware que muestra información detallada sobre las solicitudes HTTP en la consola.
 
-- **Avance del Proyecto**: 11 de julio de 2024
-  - Tener listos los endpoints básicos, el control de rutas inexistentes, la conexión con MongoDB y los métodos GET funcionando.
 
-- **Presentación Final**: 30 de julio de 2024
-  - Proyecto 100% funcional.
+4. **Middleware de Autenticación JWT**
+<!-- 
+const verifyToken = (req, res, next) => {
+  const token = req.headers['authorization'];
 
-## Estructura del Repositorio
+  if (!token) {
+    return res.status(401).json({ error: 'No token provided' });
+  }
 
-```plaintext
-/json
-  - computacion.json
-  - electronicos.json
-  - granjas.json
-  - mobiliario.json
-  - prendas.json
-  - supermercado.json
-/README.md
-/app.js
-/database.js
-/product.js
-```
+  try {
+    const decoded = jwt.verify(token, secretKey);
+    req.decoded = decoded;
+    next();
+  } catch (error) {
+    return res.status(401).json({ error: 'Invalid token' });
+  }
+};
+ -->
+Este middleware verifica si un token JWT está presente en los encabezados de autorización. Si el token es válido, lo decodifica y añade la información decodificada al objeto req, permitiendo que la solicitud continúe. Si el token no es válido o no está presente, devuelve un error 401 (No autorizado).
 
-### Descripción de Archivos
+5. **Rutas**
+Aquí se definen las rutas para manejar diferentes tipos de solicitudes:
 
-- **/json**: Carpeta que contiene los datasets JSON.
-- **/README.md**: Archivo con la descripción del proyecto.
-- **/app.js**: Archivo principal de la aplicación Node.js donde se define toda la lógica de rutas y la conexión a la base de datos.
-- **/database.js**: Archivo para configurar la conexión a la base de datos MongoDB.
-- **/product.js**: Archivo que contiene el esquema (schema) del producto utilizando Mongoose.
+**POST /login:** 
+Autenticación de usuario. Verifica las credenciales y devuelve un token JWT si las credenciales son válidas.
 
-## Instrucciones de Entrega
+<!-- 
+app.post('/login', (req, res) => {
+  // Lógica para autenticar al usuario
+});
+ -->
 
-1. **Fork** el repositorio desde [aquí](https://github.com/FabioDrizZt/Trabajo-Integrador-Backend-Diplomatura-UNTREF/fork).
-2. **Clona** tu fork en tu máquina local.
-   ```bash
-   git clone https://github.com/tu-usuario/tu-repositorio-fork.git
-   ```
-3. Realiza los cambios y sube tu código a tu fork.
-4. **Sube** los cambios a tu fork.
-   ```bash
-   git add .
-   git commit -m "Descripción de los cambios"
-   git push origin main
-   ```
+**POST /register:**
+Registro de nuevos usuarios. Verifica si el nombre de usuario ya existe, crea un nuevo usuario y devuelve un token JWT.
 
-5. Agrega a los siguientes usuarios como colaboradores en tu repositorio:
-   - [FabioDrizZt](https://github.com/FabioDrizZt)
-   - [JuanNebbia](https://github.com/JuanNebbia)
-   - [NKrein](https://github.com/NKrein)
-   - [mathiasbarbosa](https://github.com/mathiasbarbosa)
+<!-- 
+app.post('/register', async (req, res) => {
+  // Lógica para registrar un nuevo usuario
+}); 
+-->
 
-## Conclusión
+**GET /dispositivos:** 
+Obtiene todos los dispositivos. Se puede filtrar por categoría a través de un parámetro de consulta.
 
-Este proyecto te permitirá aplicar tus conocimientos en desarrollo backend con Node.js y MongoDB, implementando un CRUD completo con control de errores y buenas prácticas. ¡Buena suerte y adelante con el desarrollo!
+<!-- 
+app.get("/dispositivos", (req, res) => {
+  // Lógica para obtener dispositivos
+}); 
+-->
 
----
+**GET /dispositivos/:id:**
+Obtiene un dispositivo por su ID. Requiere autenticación JWT.
 
-Recuerda mantener tu código limpio, documentado y seguir las buenas prácticas de desarrollo. ¡Nos vemos en clase para revisar tu progreso el 11 de julio de 2024!
+<!--
+app.get("/dispositivos/:id", verifyToken, (req, res) => {
+  // Lógica para obtener un dispositivo por ID
+}); 
+-->
+
+**GET /dispositivos/codigo/:codigo:**
+Obtiene dispositivos por código. Si el código es inválido, devuelve un error.
+
+<!-- 
+app.get("/dispositivos/codigo/:codigo", (req, res) => {
+  // Lógica para obtener dispositivos por código
+}); 
+-->
+
+
+**GET /dispositivos/nombre/:nombre:**
+Busca dispositivos por nombre usando una expresión regular para realizar una búsqueda parcial.
+
+<!-- 
+app.get("/dispositivos/nombre/:nombre", (req, res) => {
+  // Lógica para buscar dispositivos por nombre
+});
+ -->
+
+
+**POST /dispositivos/agregar/:**
+Agrega un nuevo dispositivo. Requiere autenticación JWT.
+
+<!-- 
+app.post("/dispositivos/agregar/", verifyToken, (req, res) => {
+  // Lógica para agregar un nuevo dispositivo
+}); 
+-->
+
+
+
+**PATCH /dispositivos/modificar/:codigo:** 
+Modifica el precio de un dispositivo buscando por código. Requiere autenticación JWT.
+
+<!-- 
+app.patch("/dispositivos/modificar/:codigo", verifyToken, (req, res) => {
+  // Lógica para modificar el precio de un dispositivo
+}); 
+-->
+
+
+
+**DELETE /dispositivos/delete/:codigo:**
+Elimina un dispositivo por código. Requiere autenticación JWT.
+
+<!--
+ app.delete("/dispositivos/delete/:codigo", verifyToken, (req, res) => {
+  // Lógica para eliminar un dispositivo por código
+});
+ -->
+
+
+6. **Manejo de Errores**
+
+app.use((req, res) => {
+  res.status(404).send("Página no encontrada");
+});
+
+Esta ruta maneja todas las solicitudes no coincidentes, devolviendo un error 404 con el mensaje "Página no encontrada".
+
+
+
+7. **Iniciar el Servidor**
+app.listen(port, () => {
+  console.log(`Example app listening on http://localhost:${port}`);
+});
+
+Inicia el servidor en el puerto especificado y muestra un mensaje en la consola indicando que la aplicación está escuchando.
+
+
+
+
+**En resumen, este código configura un servidor Express que maneja la autenticación de usuarios con JWT, proporciona CRUD para dispositivos electrónicos y maneja errores. La estructura modular permite conectar con MongoDB, autenticar usuarios y realizar operaciones CRUD en dispositivos.**

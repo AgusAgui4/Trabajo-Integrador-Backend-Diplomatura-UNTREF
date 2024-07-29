@@ -88,7 +88,7 @@ app.get("/", (req, res) => {
 });
 
 //trae todos los dispositivos y le podes especificar una categoria
-app.get("/dispositivos",verifyToken, (req, res) => {
+app.get("/dispositivos", (req, res) => {
   const { categoria } = req.query;
   const query = !categoria ? {} : { categorias: { $eq: categoria } };
   product
@@ -104,7 +104,7 @@ app.get("/dispositivos",verifyToken, (req, res) => {
 
 
 //obtiene producto por id
-app.get("/dispositivos/:id", (req, res) => {
+app.get("/dispositivos/:id",verifyToken, (req, res) => {
   const { id } = req.params;
   product
     .findById(id)
@@ -169,7 +169,7 @@ app.get("/dispositivos/nombre/:nombre", (req, res) => {
 
 
 //agregar producto
-app.post("/dispositivos/agregar/", (req, res) => {
+app.post("/dispositivos/agregar/",verifyToken, (req, res) => {
 
   const dispositivos = new product (req.body)
   dispositivos
@@ -185,7 +185,7 @@ app.post("/dispositivos/agregar/", (req, res) => {
 
 
 //modifica precio buscando por codigo
-app.patch("/dispositivos/modificar/:codigo", (req, res) => {
+app.patch("/dispositivos/modificar/:codigo",verifyToken, (req, res) => {
   const  {codigo}  = req.params;
   const  modificacion  = req.body.precio;
 
@@ -211,7 +211,7 @@ app.patch("/dispositivos/modificar/:codigo", (req, res) => {
 
 
 //elimina por codigo
-app.delete("/dispositivos/delete/:codigo", (req, res) => {
+app.delete("/dispositivos/delete/:codigo",verifyToken, (req, res) => {
   const { codigo } = req.params;
 
   if (Number(codigo)) {
