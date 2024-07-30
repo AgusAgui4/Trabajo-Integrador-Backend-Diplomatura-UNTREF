@@ -66,14 +66,15 @@ const verifyToken = (req, res, next) => {
  -->
 Este middleware verifica si un token JWT está presente en los encabezados de autorización. Si el token es válido, lo decodifica y añade la información decodificada al objeto req, permitiendo que la solicitud continúe. Si el token no es válido o no está presente, devuelve un error 401 (No autorizado).
 
-5. **Rutas**
+5. **RUTAS**
 Aquí se definen las rutas para manejar diferentes tipos de solicitudes:
+
 
 **POST /login:** 
 Autenticación de usuario. Verifica las credenciales y devuelve un token JWT si las credenciales son válidas.
 
 <!-- 
-app.post('/login', (req, res) => {
+app.post('/login', async (req, res) => {
   // Lógica para autenticar al usuario
 });
  -->
@@ -91,7 +92,7 @@ app.post('/register', async (req, res) => {
 Obtiene todos los dispositivos. Se puede filtrar por categoría a través de un parámetro de consulta.
 
 <!-- 
-app.get("/dispositivos", (req, res) => {
+app.get("/dispositivos", async (req, res) => {
   // Lógica para obtener dispositivos
 }); 
 -->
@@ -100,7 +101,7 @@ app.get("/dispositivos", (req, res) => {
 Obtiene un dispositivo por su ID. Requiere autenticación JWT.
 
 <!--
-app.get("/dispositivos/:id", verifyToken, (req, res) => {
+app.get("/dispositivos/:id", verifyToken, async (req, res) => {
   // Lógica para obtener un dispositivo por ID
 }); 
 -->
@@ -109,7 +110,7 @@ app.get("/dispositivos/:id", verifyToken, (req, res) => {
 Obtiene dispositivos por código. Si el código es inválido, devuelve un error.
 
 <!-- 
-app.get("/dispositivos/codigo/:codigo", (req, res) => {
+app.get("/dispositivos/codigo/:codigo", async (req, res) => {
   // Lógica para obtener dispositivos por código
 }); 
 -->
@@ -119,7 +120,7 @@ app.get("/dispositivos/codigo/:codigo", (req, res) => {
 Busca dispositivos por nombre usando una expresión regular para realizar una búsqueda parcial.
 
 <!-- 
-app.get("/dispositivos/nombre/:nombre", (req, res) => {
+app.get("/dispositivos/nombre/:nombre", async (req, res) => {
   // Lógica para buscar dispositivos por nombre
 });
  -->
@@ -129,7 +130,7 @@ app.get("/dispositivos/nombre/:nombre", (req, res) => {
 Agrega un nuevo dispositivo. Requiere autenticación JWT.
 
 <!-- 
-app.post("/dispositivos/agregar/", verifyToken, (req, res) => {
+app.post("/dispositivos/agregar/", verifyToken, async (req, res) => {
   // Lógica para agregar un nuevo dispositivo
 }); 
 -->
@@ -140,7 +141,7 @@ app.post("/dispositivos/agregar/", verifyToken, (req, res) => {
 Modifica el precio de un dispositivo buscando por código. Requiere autenticación JWT.
 
 <!-- 
-app.patch("/dispositivos/modificar/:codigo", verifyToken, (req, res) => {
+app.patch("/dispositivos/modificar/:codigo", verifyToken, async (req, res) => {
   // Lógica para modificar el precio de un dispositivo
 }); 
 -->
@@ -151,7 +152,7 @@ app.patch("/dispositivos/modificar/:codigo", verifyToken, (req, res) => {
 Elimina un dispositivo por código. Requiere autenticación JWT.
 
 <!--
- app.delete("/dispositivos/delete/:codigo", verifyToken, (req, res) => {
+ app.delete("/dispositivos/delete/:codigo", verifyToken, async (req, res) => {
   // Lógica para eliminar un dispositivo por código
 });
  -->
@@ -160,7 +161,7 @@ Elimina un dispositivo por código. Requiere autenticación JWT.
 6. **Manejo de Errores**
 
 app.use((req, res) => {
-  res.status(404).send("Página no encontrada");
+  res.status(404).json({ error: "Página no encontrada" });
 });
 
 Esta ruta maneja todas las solicitudes no coincidentes, devolviendo un error 404 con el mensaje "Página no encontrada".
